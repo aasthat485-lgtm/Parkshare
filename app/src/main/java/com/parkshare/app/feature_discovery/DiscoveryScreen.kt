@@ -1,5 +1,6 @@
 package com.parkshare.app.feature_discovery
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -7,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
@@ -37,12 +39,17 @@ import com.parkshare.app.ui.theme.ParkshareTheme
 fun DiscoveryScreen(
     modifier: Modifier = Modifier,
     viewModel: DiscoveryViewModel = viewModel(),
-    onSpotSelected: (ParkingSpot) -> Unit = {}
+    onSpotSelected: (ParkingSpot) -> Unit = {},
+    onBackToAuth: () -> Unit = {}
 ) {
     val spots by viewModel.parkingSpots
     val searchQuery by viewModel.searchQuery
     val onlyEv by viewModel.onlyEv
     val under50 by viewModel.under50
+
+    BackHandler {
+        onBackToAuth()
+    }
 
     DiscoveryContent(
         spots = spots,
@@ -53,6 +60,7 @@ fun DiscoveryScreen(
         onEvToggled = { viewModel.toggleEvFilter(it) },
         onUnder50Toggled = { viewModel.toggleUnder50Filter(it) },
         onSpotSelected = onSpotSelected,
+        onBackToAuth = onBackToAuth,
         modifier = modifier
     )
 }
@@ -68,6 +76,7 @@ fun DiscoveryContent(
     onEvToggled: (Boolean) -> Unit,
     onUnder50Toggled: (Boolean) -> Unit,
     onSpotSelected: (ParkingSpot) -> Unit,
+    onBackToAuth: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -84,11 +93,26 @@ fun DiscoveryContent(
                         .statusBarsPadding()
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
-                    Text(
-                        text = "Find Parking",
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Find Parking",
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        IconButton(onClick = onBackToAuth) {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Profile / Account",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -117,8 +141,9 @@ fun DiscoveryContent(
                         shape = RoundedCornerShape(14.dp),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
                         )
                     )
 
