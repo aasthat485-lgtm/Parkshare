@@ -14,7 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.parkshare.app.feature_auth.AuthScreen
 import com.parkshare.app.feature_auth.AuthViewModel
+import com.parkshare.app.feature_auth.UserRole
 import com.parkshare.app.feature_discovery.DiscoveryScreen
+import com.parkshare.app.feature_host.HostScreen
 import com.parkshare.app.ui.theme.ParkshareTheme
 
 /**
@@ -22,7 +24,8 @@ import com.parkshare.app.ui.theme.ParkshareTheme
  */
 enum class AppDestination {
     AUTH,
-    DISCOVERY
+    DISCOVERY,
+    HOST_DASHBOARD
 }
 
 class MainActivity : ComponentActivity() {
@@ -43,9 +46,13 @@ class MainActivity : ComponentActivity() {
                         AppDestination.AUTH -> {
                             AuthScreen(
                                 viewModel = authViewModel,
-                                onAuthSuccess = { _ ->
-                                    // Navigates directly to Sudhanshu's Discovery screen
-                                    currentDestination = AppDestination.DISCOVERY
+                                onAuthSuccess = { session ->
+                                    // Role-based routing: HOST routes to HostScreen, DRIVER routes to DiscoveryScreen
+                                    currentDestination = if (session.role == UserRole.HOST) {
+                                        AppDestination.HOST_DASHBOARD
+                                    } else {
+                                        AppDestination.DISCOVERY
+                                    }
                                 }
                             )
                         }
@@ -59,7 +66,13 @@ class MainActivity : ComponentActivity() {
                                     ).show()
                                 },
                                 onBackToAuth = {
-                                    // Return to Profile / Auth
+                                    currentDestination = AppDestination.AUTH
+                                }
+                            )
+                        }
+                        AppDestination.HOST_DASHBOARD -> {
+                            HostScreen(
+                                onBackToAuth = {
                                     currentDestination = AppDestination.AUTH
                                 }
                             )
